@@ -34,11 +34,43 @@ public class Piece {
 	 Makes its own copy of the array and the TPoints inside it.
 	*/
 	public Piece(TPoint[] points) {
-		// YOUR CODE HERE
+		// make a copy
+		body = new TPoint[points.length];
+		for (int i = 0; i < body.length; i++) {
+			body[i] = new TPoint(points[i].x, points[i].y);
+		}
+
+		// evaluate width and height
+		int currX = 0;
+		int currY = 0;
+        for (TPoint point : body) {
+            if (point.x > currX) {
+                currX = point.x;
+            }
+            if (point.y > currY) {
+                currY = point.y;
+            }
+        }
+		width = currX + 1;
+		height = currY + 1;
+
+		// evaluate skirt
+		skirt = new int[width];
+		for (int x = 0; x < width; x++) {
+			int min = Integer.MAX_VALUE;
+            for (TPoint tPoint : body) {
+                if (tPoint.x == x) {
+                    if (tPoint.y < min) {
+                        min = tPoint.y;
+                    }
+                }
+            }
+			skirt[x] = min;
+		}
+
 	}
 	
 
-	
 	
 	/**
 	 * Alternate constructor, takes a String with the x,y body points
@@ -87,8 +119,18 @@ public class Piece {
 	 rotated from the receiver.
 	 */
 	public Piece computeNextRotation() {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		// for every we need: (x,y) -> (-y + (height - 1), x).
+		// in general to do counter-clockwise 90 rotation
+		// it is (-y,x). we need to adjust it to our case
+		// so it will be (-y + (height - 1), x)
+
+		TPoint[] newPoints = new TPoint[body.length];
+		int slide = height - 1;
+		for (int i = 0; i < body.length; i++) {
+			newPoints[i] = new TPoint(slide - body[i].y, body[i].x);
+		}
+
+		return new Piece(newPoints);
 	}
 
 	/**
@@ -114,13 +156,26 @@ public class Piece {
 	public boolean equals(Object obj) {
 		// standard equals() technique 1
 		if (obj == this) return true;
-		
+
 		// standard equals() technique 2
 		// (null will be false)
 		if (!(obj instanceof Piece)) return false;
 		Piece other = (Piece)obj;
-		
-		// YOUR CODE HERE
+
+		if (this.body.length != other.body.length) return false;
+
+
+		for (TPoint tp : this.body) {
+			boolean same = false;
+			for (TPoint tp2 : other.body) {
+				if (tp.x == tp2.x && tp.y == tp2.y) {
+					same = true;
+					break;
+				}
+			}
+			if (!same) return false;
+		}
+
 		return true;
 	}
 
@@ -181,17 +236,22 @@ public class Piece {
 	 as possible. Returns the root piece. fastRotation() relies on the
 	 pointer structure setup here.
 	*/
-	/*
-	 Implementation: uses computeNextRotation()
-	 and Piece.equals() to detect when the rotations have gotten us back
-	 to the first piece.
-	*/
 	private static Piece makeFastRotations(Piece root) {
-		// YOUR CODE HERE
-		return null; // YOUR CODE HERE
+		Piece curr = root;
+
+		while (true) {
+			Piece nextP = curr.computeNextRotation();
+			if (nextP.equals(root)) {
+				curr.next = root;
+				break;
+			}
+			curr.next = nextP;
+			curr = nextP;
+		}
+		return root;
 	}
-	
-	
+
+
 
 	/**
 	 Given a string of x,y pairs ("0 0	0 1 0 2 1 0"), parses

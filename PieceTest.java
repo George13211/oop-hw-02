@@ -57,6 +57,31 @@ public class PieceTest extends TestCase {
 		assertTrue(Arrays.equals(new int[] {0, 0, 1}, s.getSkirt()));
 		assertTrue(Arrays.equals(new int[] {1, 0}, sRotated.getSkirt()));
 	}
-	
-	
+
+	public void testEquals() {
+		assertTrue(pyr1.equals(pyr1));
+
+		Piece newP = new Piece(Piece.PYRAMID_STR);
+		assertTrue(pyr1.equals(newP));
+
+		assertFalse(pyr1.equals(pyr2));
+		assertFalse(pyr1.equals(s));
+
+		assertFalse(pyr1.equals(null));
+		assertFalse(pyr1.equals("Other"));
+
+	}
+
+	public void testGetPieces() {
+		Piece[] pieces = Piece.getPieces();
+		assertNotNull(pieces);
+		assertEquals(7, pieces.length);
+
+		Piece pyramid = pieces[Piece.PYRAMID];
+		assertTrue(pyr1.equals(pyramid));
+
+		assertNotNull(pyramid.fastRotation());
+		assertNotSame(pyramid, pyramid.fastRotation());
+	}
+
 }
